@@ -1,18 +1,20 @@
 // app/(tabs)/profile/professional.tsx
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
-import { useAuthStore } from '../../../store/authStore'; // Ajustado
-import { Colors } from '../../../constants/Colors'; // Ajustado
-import Input from '../../../components/Input'; // Ajustado
-import Button from '../../../components/Button'; // Ajustado
-import axiosInstance from '../../../api/axiosInstance'; // Ajustado
-import { Professional, UpdateProfessionalProfileDTO, User } from '../../../types'; // Ajustado
+import { useAuthStore } from '../../../store/authStore';
+import { Colors } from '../../../constants/Colors';
+import Input from '../../../components/Input';
+import Button from '../../../components/Button';
+import axiosInstance from '../../../api/axiosInstance';
+import { Professional, UpdateProfessionalProfileDTO, User } from '../../../types';
 import { StatusBar } from 'expo-status-bar';
+import { router } from 'expo-router'; // Importar router para navegação
+
 
 export default function ProfessionalProfileScreen() {
   const { user, token, setUserProfile } = useAuthStore();
-  const [loading, setLoading] = useState<boolean>(true);
-  const [editMode, setEditMode] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [editMode, setEditMode] = useState<boolean>(true);
   const [isProfessionalProfileLoaded, setIsProfessionalProfileLoaded] = useState<boolean>(false);
 
   // Estados para os campos do formulário profissional
@@ -22,43 +24,6 @@ export default function ProfessionalProfileScreen() {
   const [metodosUtilizados, setMetodosUtilizados] = useState<string>('');
   const [hobbiesProfissional, setHobbiesProfissional] = useState<string>('');
 
-  useEffect(() => {
-    if (user?.tipo === 'PROFISSIONAL') {
-      fetchProfessionalProfile();
-    } else {
-      setLoading(false);
-    }
-  }, [user?.tipo]);
-
-  const fetchProfessionalProfile = async () => {
-    if (!token || user?.tipo !== 'PROFISSIONAL') {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await axiosInstance.get<Professional>('/profissionais/meu-perfil');
-      const data = response.data;
-      setDisponibilidade(data.disponibilidade || '');
-      setCertificacoes(data.certificacoes?.join(', ') || '');
-      setEspecializacoes(data.especializacoes?.join(', ') || '');
-      setMetodosUtilizados(data.metodosUtilizados?.join(', ') || '');
-      setHobbiesProfissional(data.hobbies?.join(', ') || '');
-      setIsProfessionalProfileLoaded(true);
-    } catch (error: any) {
-      console.error('Erro ao carregar perfil profissional:', error.response?.data || error.message);
-      if (error.response?.status === 404) {
-        Alert.alert('Perfil Profissional', 'Você ainda não possui um perfil profissional completo. Preencha os dados abaixo para criá-lo.');
-        setIsProfessionalProfileLoaded(false);
-        setEditMode(true);
-      } else {
-        Alert.alert('Erro', error.response?.data?.message || 'Não foi possível carregar seu perfil profissional.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleUpdateProfessionalProfile = async () => {
     setLoading(true);
@@ -77,35 +42,16 @@ export default function ProfessionalProfileScreen() {
         Alert.alert('Sucesso', 'Perfil profissional atualizado com sucesso!');
         setIsProfessionalProfileLoaded(true);
         setEditMode(false);
+        setUserProfile({ tipo: 'PROFISSIONAL' });
+
+        // NOVO: Navegar para a aba de Profissionais após salvar
+        router.replace('/(tabs)/professionals'); // Navega para a aba de profissionais
       } else {
         Alert.alert('Erro', 'Falha ao atualizar perfil profissional. Tente novamente.');
       }
     } catch (error: any) {
       console.error('Erro ao atualizar perfil profissional:', error.response?.data || error.message);
       Alert.alert('Erro', error.response?.data?.message || 'Não foi possível atualizar o perfil profissional.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleBecomeProfessional = async () => {
-    if (!user) return;
-
-    try {
-      setLoading(true);
-      const response = await axiosInstance.patch<User>(`/usuarios/${user.id}/tornar-profissional`);
-
-      if (response.status === 200) {
-        Alert.alert('Sucesso', 'Seu perfil foi atualizado para Profissional. Agora você pode completar seu perfil profissional!');
-        setUserProfile(response.data);
-        setEditMode(true);
-        setIsProfessionalProfileLoaded(false);
-      } else {
-        Alert.alert('Erro', 'Não foi possível converter seu perfil para profissional.');
-      }
-    } catch (error: any) {
-      console.error('Erro ao converter para profissional:', error.response?.data || error.message);
-      Alert.alert('Erro', error.response?.data?.message || 'Não foi possível converter seu perfil para profissional.');
     } finally {
       setLoading(false);
     }
@@ -120,33 +66,14 @@ export default function ProfessionalProfileScreen() {
     );
   }
 
-  if (user?.tipo !== 'PROFISSIONAL') {
-    return (
-      <View style={styles.container}>
-        <StatusBar style="light" />
-        <Text style={styles.title}>Complete seu Perfil</Text>
-        <Text style={styles.noAccessText}>Para oferecer serviços na plataforma, você precisa ter um perfil de Profissional.</Text>
-        <Button title="Tornar-me Profissional" onPress={handleBecomeProfessional} style={styles.becomeProButton} disabled={loading} />
-      </View>
-    );
-  }
-
-  if (!isProfessionalProfileLoaded && !editMode) {
-    return (
-      <ScrollView contentContainerStyle={styles.container}>
-        <StatusBar style="light" />
-        <Text style={styles.title}>Complete seu Perfil Profissional</Text>
-        <Text style={styles.noAccessText}>Por favor, preencha as informações abaixo para configurar seu perfil como profissional.</Text>
-        <Button title="Preencher Perfil Profissional" onPress={() => setEditMode(true)} style={styles.becomeProButton} />
-      </ScrollView>
-    );
-  }
-
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <StatusBar style="light" />
       <Text style={styles.title}>Meu Perfil Profissional</Text>
+
+      {!isProfessionalProfileLoaded && (
+        <Text style={styles.noAccessText}>Por favor, preencha as informações abaixo para configurar seu perfil como profissional.</Text>
+      )}
 
       <Input label="Nome (Usuário)" value={user?.nome || ''} editable={false} />
       <Input label="Email (Usuário)" value={user?.email || ''} editable={false} />
@@ -162,7 +89,9 @@ export default function ProfessionalProfileScreen() {
       ) : (
         <View style={styles.buttonContainer}>
           <Button title="Salvar Alterações" onPress={handleUpdateProfessionalProfile} style={styles.button} disabled={loading} />
-          <Button title="Cancelar" onPress={() => { setEditMode(false); fetchProfessionalProfile(); }} style={[styles.button, styles.cancelButton]} textStyle={styles.cancelButtonText} />
+          {isProfessionalProfileLoaded && (
+            <Button title="Cancelar" onPress={() => { setEditMode(false); /* AQUI VOCÊ PODE CHAMAR fetchProfessionalProfile() NOVAMENTE SE QUISER RECARREGAR OS DADOS */}} style={[styles.button, styles.cancelButton]} textStyle={styles.cancelButtonText} />
+          )}
         </View>
       )}
     </ScrollView>
@@ -192,8 +121,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: Colors.textDark,
     textAlign: 'center',
-    marginTop: 20,
-    marginBottom: 30,
+    marginTop: 10,
+    marginBottom: 20,
     paddingHorizontal: 10,
   },
   button: {
@@ -210,6 +139,7 @@ const styles = StyleSheet.create({
     color: Colors.background,
   },
   becomeProButton: {
+    backgroundColor: Colors.accentGreen,
     marginTop: 30,
   },
 });

@@ -1,5 +1,5 @@
 // app/(tabs)/professionals.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
 import { Colors } from '../../constants/Colors';
 import axiosInstance from '../../api/axiosInstance';
@@ -7,17 +7,19 @@ import { Professional, UserType } from '../../types';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useAuthStore } from '../../store/authStore';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons'; // Manter se usar MaterialIcons para outros ícones, senão pode remover
 import Button from '../../components/Button';
+import { useFocusEffect } from '@react-navigation/native';
+
 
 interface ProfessionalCardProps {
   professional: Professional;
   onViewDetails: (id: number) => void;
-  onFavoriteToggle: (id: number, isFavorited: boolean) => void;
-  isFavorited: boolean;
+  // REMOVIDO: onFavoriteToggle e isFavorited
 }
 
-const ProfessionalCard: React.FC<ProfessionalCardProps> = ({ professional, onViewDetails, onFavoriteToggle, isFavorited }) => {
+// ProfessionalCard sem a funcionalidade de favoritos
+const ProfessionalCard: React.FC<ProfessionalCardProps> = ({ professional, onViewDetails }) => {
   const professionalName = professional.usuario?.nome || 'Profissional Desconhecido';
 
   return (
@@ -26,9 +28,7 @@ const ProfessionalCard: React.FC<ProfessionalCardProps> = ({ professional, onVie
       <Text style={styles.cardDetail}>Especializações: {professional.especializacoes?.join(', ') || 'N/A'}</Text>
       <Text style={styles.cardDetail}>Disponibilidade: {professional.disponibilidade || 'N/A'}</Text>
       <View style={styles.cardActions}>
-        <TouchableOpacity onPress={() => onFavoriteToggle(professional.id, isFavorited)} style={styles.favoriteButton}>
-          <MaterialIcons name={isFavorited ? "favorite" : "favorite-border"} size={24} color={Colors.primaryBlue} />
-        </TouchableOpacity>
+        {/* REMOVIDO: Botão de favoritar */}
         <Button
           title="Ver Perfil"
           onPress={() => onViewDetails(professional.id)}
@@ -43,17 +43,10 @@ const ProfessionalCard: React.FC<ProfessionalCardProps> = ({ professional, onVie
 export default function ProfessionalsScreen() {
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [favoritedProfessionals, setFavoritedProfessionals] = useState<Set<number>>(new Set());
+  // REMOVIDO: favoritedProfessionals state
   const { user } = useAuthStore();
 
-  useEffect(() => {
-    fetchProfessionals();
-    if (user?.tipo === 'USUARIO') {
-      fetchFavorites();
-    }
-  }, [user?.tipo]);
-
-  const fetchProfessionals = async () => {
+  const fetchProfessionals = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axiosInstance.get<Professional[]>('/profissionais');
@@ -64,53 +57,26 @@ export default function ProfessionalsScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchFavorites = async () => {
-    try {
-      const response = await axiosInstance.get<any[]>('/favoritos/me');
-      const favoriteIds = new Set(response.data.map(fav => fav.profissional.id));
-      setFavoritedProfessionals(favoriteIds);
-    } catch (error: any) {
-      console.error('Erro ao carregar favoritos:', error.response?.data || error.message);
-    }
-  };
+  // REMOVIDO: fetchFavorites function
+
+  // AGORA USAMOS useFocusEffect para refetch quando a tela está em foco
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfessionals();
+      // REMOVIDO: Chamada a fetchFavorites
+      return () => {
+        // Lógica de limpeza
+      };
+    }, [fetchProfessionals]) // Dependências: apenas fetchProfessionals
+  );
 
   const handleViewDetails = (id: number) => {
     router.push(`/(tabs)/professionals/${id}`);
   };
 
-  // CORREÇÃO: Verifique a definição e o uso de professionalId AQUI
-  const handleFavoriteToggle = async (profissionalId: number, isCurrentlyFavorited: boolean) => {
-    console.log(`handleFavoriteToggle chamado. ID do profissional: ${profissionalId}, Favoritado atualmente: ${isCurrentlyFavorited}`); // Log para depuração
-
-    if (user?.tipo !== 'USUARIO') {
-      Alert.alert('Acesso Negado', 'Apenas usuários comuns podem favoritar profissionais.');
-      return;
-    }
-
-    try {
-      if (isCurrentlyFavorited) {
-        // Desfavoritar
-        // A linha 102 no seu erro original deve ser esta abaixo:
-        await axiosInstance.delete(`/favoritos/${profissionalId}`); // professionalId deve estar no escopo
-        setFavoritedProfessionals(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(profissionalId);
-          return newSet;
-        });
-        Alert.alert('Sucesso', 'Profissional removido dos favoritos.');
-      } else {
-        // Favoritar
-        await axiosInstance.post('/favoritos', { profissionalId });
-        setFavoritedProfessionals(prev => new Set(prev).add(profissionalId));
-        Alert.alert('Sucesso', 'Profissional adicionado aos favoritos!');
-      }
-    } catch (error: any) {
-      console.error('Erro ao favoritar/desfavoritar:', error.response?.data || error.message);
-      Alert.alert('Erro', error.response?.data?.message || 'Não foi possível atualizar favoritos.');
-    }
-  };
+  // REMOVIDO: handleFavoriteToggle function
 
   if (loading) {
     return (
@@ -131,8 +97,7 @@ export default function ProfessionalsScreen() {
           <ProfessionalCard
             professional={item}
             onViewDetails={handleViewDetails}
-            onFavoriteToggle={handleFavoriteToggle} // Passando a função como prop
-            isFavorited={favoritedProfessionals.has(item.id)}
+            // REMOVIDO: onFavoriteToggle e isFavorited props
           />
         )}
         contentContainerStyle={styles.listContent}
@@ -193,11 +158,11 @@ const styles = StyleSheet.create({
   },
   cardActions: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end', // Ajustado para alinhar o botão "Ver Perfil" à direita
     alignItems: 'center',
     marginTop: 10,
   },
-  favoriteButton: {
+  favoriteButton: { // Mantenha o estilo se for referenciado em outro lugar ou remova
     padding: 5,
   },
   viewProfileButton: {

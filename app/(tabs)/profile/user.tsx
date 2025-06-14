@@ -1,14 +1,15 @@
 // app/(tabs)/profile/user.tsx
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
-import { useAuthStore } from '../../../store/authStore'; // Ajustado
-import { Colors } from '../../../constants/Colors'; // Ajustado
-import Input from '../../../components/Input'; // Ajustado
-import Button from '../../../components/Button'; // Ajustado
-import axiosInstance from '../../../api/axiosInstance'; // Ajustado
-import { User, Gender, UserType } from '../../../types'; // Ajustado
+import { useAuthStore } from '../../../store/authStore';
+import { Colors } from '../../../constants/Colors';
+import Input from '../../../components/Input';
+import Button from '../../../components/Button';
+import axiosInstance from '../../../api/axiosInstance';
+import { User, Gender, UserType } from '../../../types';
 import { StatusBar } from 'expo-status-bar';
 import { Picker } from '@react-native-picker/picker';
+import { router } from 'expo-router'; // Importar router para navegação
 
 export default function UserProfileScreen() {
   const { user, token, setUserProfile } = useAuthStore();
@@ -22,7 +23,7 @@ export default function UserProfileScreen() {
   const [cidade, setCidade] = useState<string>(user?.cidade || '');
   const [estado, setEstado] = useState<string>(user?.estado || '');
   const [tipoNeurodivergencia, setTipoNeurodivergencia] = useState<string>(user?.tipoNeurodivergencia || '');
-  const [preferenciasSensoriais, setPreferenciasSensoriais] = useState<string>(user?.preferenciasSensoriais || ''); // Correção do nome do estado
+  const [preferenciasSensoriais, setPreferenciasSensoriaos] = useState<string>(user?.preferenciasSensoriais || '');
   const [modoComunicacao, setModoComunicacao] = useState<string>(user?.modoComunicacao || '');
   const [historicoEscolar, setHistoricoEscolar] = useState<string>(user?.historicoEscolar || '');
   const [hobbies, setHobbies] = useState<string>(user?.hobbies?.join(', ') || '');
@@ -35,7 +36,7 @@ export default function UserProfileScreen() {
       setCidade(user.cidade || '');
       setEstado(user.estado || '');
       setTipoNeurodivergencia(user.tipoNeurodivergencia || '');
-      setPreferenciasSensoriais(user.preferenciasSensoriais || '');
+      setPreferenciasSensoriaos(user.preferenciasSensoriais || '');
       setModoComunicacao(user.modoComunicacao || '');
       setHistoricoEscolar(user.historicoEscolar || '');
       setHobbies(user.hobbies?.join(', ') || '');
@@ -63,7 +64,7 @@ export default function UserProfileScreen() {
       setCidade(data.cidade || '');
       setEstado(data.estado || '');
       setTipoNeurodivergencia(data.tipoNeurodivergencia || '');
-      setPreferenciasSensoriais(data.preferenciasSensoriais || '');
+      setPreferenciasSensoriaos(data.preferenciasSensoriais || '');
       setModoComunicacao(data.modoComunicacao || '');
       setHistoricoEscolar(data.historicoEscolar || '');
       setHobbies(data.hobbies?.join(', ') || '');
@@ -113,6 +114,12 @@ export default function UserProfileScreen() {
     }
   };
 
+  // REMOVIDA LÓGICA DE API DAQUI. AGORA APENAS NAVEGA.
+  const handleNavigateToBecomeProfessional = () => {
+    router.push('/(tabs)/profile/professional'); // Navega para a tela de perfil profissional
+  };
+
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -148,13 +155,23 @@ export default function UserProfileScreen() {
       <Input label="Cidade" value={cidade} onChangeText={setCidade} editable={editMode} />
       <Input label="Estado (UF)" value={estado} onChangeText={setEstado} editable={editMode} />
       <Input label="Tipo de Neurodivergência" value={tipoNeurodivergencia} onChangeText={setTipoNeurodivergencia} editable={editMode} />
-      <Input label="Preferências Sensoriais" value={preferenciasSensoriais} onChangeText={setPreferenciasSensoriais} editable={editMode} multiline />
+      <Input label="Preferências Sensoriais" value={preferenciasSensoriais} onChangeText={setPreferenciasSensoriaos} editable={editMode} multiline />
       <Input label="Modo de Comunicação" value={modoComunicacao} onChangeText={setModoComunicacao} editable={editMode} />
       <Input label="Histórico Escolar" value={historicoEscolar} onChangeText={setHistoricoEscolar} editable={editMode} multiline />
       <Input label="Hobbies (separados por vírgula)" value={hobbies} onChangeText={setHobbies} editable={editMode} multiline />
 
       {!editMode ? (
-        <Button title="Editar Perfil" onPress={() => setEditMode(true)} style={styles.button} />
+        <View style={styles.buttonGroup}>
+          <Button title="Editar Perfil" onPress={() => setEditMode(true)} style={styles.button} />
+          {user?.tipo === 'USUARIO' && ( // MOSTRAR APENAS SE FOR USUARIO COMUM
+            <Button
+              title="Tornar-me Profissional"
+              onPress={handleNavigateToBecomeProfessional} // Agora apenas navega
+              style={[styles.button, styles.becomeProButton]}
+              disabled={loading}
+            />
+          )}
+        </View>
       ) : (
         <View style={styles.buttonContainer}>
           <Button title="Salvar Alterações" onPress={handleUpdateProfile} style={styles.button} disabled={loading} />
@@ -217,4 +234,13 @@ const styles = StyleSheet.create({
     width: '100%',
     color: Colors.textDark,
   },
+  buttonGroup: { // Estilo para agrupar os botões
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  becomeProButton: {
+    backgroundColor: Colors.primaryBlue, // Cor diferente para destacar
+    marginTop: 15,
+  }
 });
