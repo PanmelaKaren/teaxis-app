@@ -1,11 +1,10 @@
-// store/authStore.ts
 import { create } from 'zustand';
-import { User } from '../types'; // Importa a interface User que agora corresponde ao UsuarioResponseDTO
+import { User } from '../types'; 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface AuthState {
-  user: User | null; // O user armazenado na store é do tipo User (que é o UsuarioResponseDTO)
+  user: User | null; 
   token: string | null;
   isAuthenticated: boolean;
   login: (userData: User, jwtToken: string) => void;

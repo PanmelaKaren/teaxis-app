@@ -1,4 +1,3 @@
-// app/register.tsx
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, Alert } from 'react-native';
 import Input from '../components/Input';
@@ -77,7 +76,6 @@ export default function RegisterScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <StatusBar style="dark" />
-      {/* LOGO MANTIDA - Caminho corrigido para assets/images/ */}
       <Image source={require('../assets/images/fundoLogo.png')} style={styles.logo} resizeMode="contain" />
       <Text style={styles.title}>Criar Conta</Text>
 
@@ -145,7 +143,7 @@ export default function RegisterScreen() {
 
         <Button
         title={loading ? "Registrando..." : "Registrar"}
-        onPress={handleRegister} // <--- TEM QUE SER handleRegister, NÃO UMA FUNÇÃO QUE LANÇA ERRO
+        onPress={handleRegister} 
         style={styles.registerButton}
         disabled={loading}
       />

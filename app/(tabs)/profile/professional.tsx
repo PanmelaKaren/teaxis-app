@@ -1,4 +1,3 @@
-// app/(tabs)/profile/professional.tsx
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useAuthStore } from '../../../store/authStore';
@@ -8,7 +7,7 @@ import Button from '../../../components/Button';
 import axiosInstance from '../../../api/axiosInstance';
 import { Professional, UpdateProfessionalProfileDTO, User } from '../../../types';
 import { StatusBar } from 'expo-status-bar';
-import { router } from 'expo-router'; // Importar router para navegação
+import { router } from 'expo-router'; 
 
 
 export default function ProfessionalProfileScreen() {
@@ -17,7 +16,6 @@ export default function ProfessionalProfileScreen() {
   const [editMode, setEditMode] = useState<boolean>(true);
   const [isProfessionalProfileLoaded, setIsProfessionalProfileLoaded] = useState<boolean>(false);
 
-  // Estados para os campos do formulário profissional
   const [disponibilidade, setDisponibilidade] = useState<string>('');
   const [certificacoes, setCertificacoes] = useState<string>('');
   const [especializacoes, setEspecializacoes] = useState<string>('');
@@ -44,8 +42,7 @@ export default function ProfessionalProfileScreen() {
         setEditMode(false);
         setUserProfile({ tipo: 'PROFISSIONAL' });
 
-        // NOVO: Navegar para a aba de Profissionais após salvar
-        router.replace('/(tabs)/professionals'); // Navega para a aba de profissionais
+        router.replace('/(tabs)/professionals'); 
       } else {
         Alert.alert('Erro', 'Falha ao atualizar perfil profissional. Tente novamente.');
       }

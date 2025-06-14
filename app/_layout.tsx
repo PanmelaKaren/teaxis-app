@@ -40,8 +40,7 @@ export default function RootLayout() {
       {isAuthenticated ? (
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       ) : (
-        // CORREÇÃO AQUI: Removido o Fragmento <> </>
-        [ // Opcional: usar um array para o TypeScript, mas geralmente não é necessário se não há Fragmento
+        [ 
           <Stack.Screen key="index" name="index" options={{ title: 'Bem-vindo', headerShown: false }} />,
           <Stack.Screen key="login" name="login" options={{ title: 'Login', headerShown: false }} />,
           <Stack.Screen key="register" name="register" options={{ title: 'Registrar', headerShown: false }} />,

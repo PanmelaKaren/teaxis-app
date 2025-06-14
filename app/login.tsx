@@ -1,4 +1,3 @@
-// app/login.tsx
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, Alert } from 'react-native';
 import Input from '../components/Input';
@@ -8,14 +7,13 @@ import { useAuthStore } from '../store/authStore';
 import { Link, router } from 'expo-router';
 import axiosInstance from '../api/axiosInstance';
 import { StatusBar } from 'expo-status-bar';
-import { DadosTokenJWT, User } from '../types'; // Importando as tipagens do types/index.ts
+import { DadosTokenJWT, User } from '../types'; 
 
 export default function LoginScreen() {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   
-  // Forma correta de pegar a função 'login' da store do Zustand
   const login = useAuthStore((state) => state.login);
 
   const handleLogin = async () => {
@@ -26,33 +24,26 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      // Usando a interface DadosTokenJWT para tipar a resposta do Axios
       const response = await axiosInstance.post<DadosTokenJWT>('/login', {
         email,
         senha: password,
       });
 
-      // Apenas para debug, pode remover em produção
       console.log('Resposta completa do Login:', response);
       console.log('Dados da Resposta (response.data):', response.data);
       console.log('Status da Resposta (response.status):', response.status);
 
-      // Desestruturando token e usuario (conforme o backend) da resposta.data
       const { token, usuario } = response.data;
 
       if (token && usuario) {
-        // Chamando a ação login da store com o objeto 'usuario' (que é do tipo User)
         login(usuario, token);
         router.replace('/(tabs)/home');
       } else {
-        // Caso a resposta.data não contenha token ou usuario, o que seria inesperado para 200 OK
         Alert.alert('Erro de Login', 'Resposta inesperada do servidor: Token ou dados do usuário ausentes.');
       }
     } catch (error: any) {
-      // Tratamento de erros aprimorado
       console.error('Erro detalhado ao fazer login:', error);
       if (error.response) {
-        // O servidor respondeu com um status diferente de 2xx (ex: 401, 403, 400, 500)
         console.error('Status do Erro:', error.response.status);
         console.error('Dados do Erro:', error.response.data);
         console.error('Headers do Erro:', error.response.headers);
@@ -61,11 +52,9 @@ export default function LoginScreen() {
           error.response.data?.message || `Erro ${error.response.status}: Credenciais inválidas ou acesso proibido.`
         );
       } else if (error.request) {
-        // A requisição foi feita mas nenhuma resposta foi recebida (ex: backend offline, problema de CORS)
         console.error('Nenhuma resposta recebida (provável problema de rede/backend offline):', error.request);
         Alert.alert('Erro de Conexão', 'Não foi possível conectar ao servidor. Verifique sua conexão ou o status do backend.');
       } else {
-        // Algo aconteceu na configuração da requisição que disparou um Erro (ex: URL malformada)
         console.error('Erro na configuração da requisição:', error.message);
         Alert.alert('Erro Interno', `Um erro inesperado ocorreu: ${error.message}`);
       }
@@ -103,7 +92,7 @@ export default function LoginScreen() {
       {/* Botão de Login: Chamar handleLogin no onPress */}
       <Button
         title={loading ? 'Entrando...' : 'Login'}
-        onPress={handleLogin} // Corrigido para chamar handleLogin
+        onPress={handleLogin} 
         style={styles.loginButton}
         disabled={loading}
       />

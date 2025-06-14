@@ -1,8 +1,6 @@
-// api/axiosInstance.ts
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
-// NOVO ENDEREÇO DO BACKEND
 const API_BASE_URL = 'https://back-end-plataforma-teaxis.onrender.com';
 
 const axiosInstance = axios.create({
@@ -12,7 +10,6 @@ const axiosInstance = axios.create({
   },
 });
 
-// Interceptor para adicionar o token JWT automaticamente
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = useAuthStore.getState().token;

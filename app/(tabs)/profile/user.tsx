@@ -1,4 +1,3 @@
-// app/(tabs)/profile/user.tsx
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useAuthStore } from '../../../store/authStore';
@@ -9,14 +8,13 @@ import axiosInstance from '../../../api/axiosInstance';
 import { User, Gender, UserType } from '../../../types';
 import { StatusBar } from 'expo-status-bar';
 import { Picker } from '@react-native-picker/picker';
-import { router } from 'expo-router'; // Importar router para navegação
+import { router } from 'expo-router'; 
 
 export default function UserProfileScreen() {
   const { user, token, setUserProfile } = useAuthStore();
   const [loading, setLoading] = useState<boolean>(true);
   const [editMode, setEditMode] = useState<boolean>(false);
 
-  // Estados para os campos do formulário
   const [nome, setNome] = useState<string>(user?.nome || '');
   const [dataNascimento, setDataNascimento] = useState<string>(user?.dataNascimento || '');
   const [genero, setGenero] = useState<Gender | undefined>(user?.genero);
@@ -114,9 +112,8 @@ export default function UserProfileScreen() {
     }
   };
 
-  // REMOVIDA LÓGICA DE API DAQUI. AGORA APENAS NAVEGA.
   const handleNavigateToBecomeProfessional = () => {
-    router.push('/(tabs)/profile/professional'); // Navega para a tela de perfil profissional
+    router.push('/(tabs)/profile/professional'); 
   };
 
 
@@ -163,10 +160,10 @@ export default function UserProfileScreen() {
       {!editMode ? (
         <View style={styles.buttonGroup}>
           <Button title="Editar Perfil" onPress={() => setEditMode(true)} style={styles.button} />
-          {user?.tipo === 'USUARIO' && ( // MOSTRAR APENAS SE FOR USUARIO COMUM
+          {user?.tipo === 'USUARIO' && ( 
             <Button
               title="Tornar-me Profissional"
-              onPress={handleNavigateToBecomeProfessional} // Agora apenas navega
+              onPress={handleNavigateToBecomeProfessional} 
               style={[styles.button, styles.becomeProButton]}
               disabled={loading}
             />
@@ -234,13 +231,13 @@ const styles = StyleSheet.create({
     width: '100%',
     color: Colors.textDark,
   },
-  buttonGroup: { // Estilo para agrupar os botões
+  buttonGroup: { 
     width: '100%',
     alignItems: 'center',
     marginTop: 20,
   },
   becomeProButton: {
-    backgroundColor: Colors.primaryBlue, // Cor diferente para destacar
+    backgroundColor: Colors.primaryBlue, 
     marginTop: 15,
   }
 });

@@ -1,19 +1,18 @@
-// app/(tabs)/professionals/[id].tsx
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { Colors } from '../../../constants/Colors'; // Ajustado
-import axiosInstance from '../../../api/axiosInstance'; // Ajustado
-import { Professional, CreateSessionDTO, AppointmentType } from '../../../types'; // Ajustado
-import Button from '../../../components/Button'; // Ajustado
-import Input from '../../../components/Input'; // Ajustado
+import { Colors } from '../../../constants/Colors'; 
+import axiosInstance from '../../../api/axiosInstance'; 
+import { Professional, CreateSessionDTO, AppointmentType } from '../../../types'; 
+import Button from '../../../components/Button'; 
+import Input from '../../../components/Input'; 
 import { Picker } from '@react-native-picker/picker';
-import { useAuthStore } from '../../../store/authStore'; // Ajustado
+import { useAuthStore } from '../../../store/authStore'; 
 import { StatusBar } from 'expo-status-bar';
 
 export default function ProfessionalDetailsScreen() {
   const { id } = useLocalSearchParams();
-  const professionalId = typeof id === 'string' ? parseInt(id, 10) : undefined; // Correção: uso correto de professionalId
+  const professionalId = typeof id === 'string' ? parseInt(id, 10) : undefined; 
 
   const { user } = useAuthStore();
 
@@ -21,7 +20,6 @@ export default function ProfessionalDetailsScreen() {
   const [loading, setLoading] = useState<boolean>(true);
   const [isScheduling, setIsScheduling] = useState<boolean>(false);
 
-  // Estados para o agendamento
   const [dataHoraAgendamento, setDataHoraAgendamento] = useState<string>('');
   const [tipoAtendimento, setTipoAtendimento] = useState<AppointmentType>('ONLINE');
   const [localOuLink, setLocalOuLink] = useState<string>('');

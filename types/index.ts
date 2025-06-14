@@ -131,17 +131,15 @@ export interface Matching {
   profissional: Professional;
   status: 'SUGERIDO' | 'ACEITO' | 'RECUSADO';
   dataSugestao: string; // Formato "AAAA-MM-DD"
-  pontuacao?: number; // Se o backend retornar uma pontuação
+  pontuacao?: number; 
 }
 
-// Entidade Favorito
 export interface Favorito {
   id: number;
   usuario: User;
   profissional: Professional;
 }
 
-// DTO para favoritar (se o endpoint exigir)
 export interface AddFavoriteDTO {
   profissionalId: number;
 }
